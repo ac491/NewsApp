@@ -28,7 +28,15 @@ import com.example.newsapp.Adapter.NewsAdapter;
 import com.example.newsapp.Database.ArticlesViewModel;
 import com.example.newsapp.Database.Model.ArticleEntity;
 import com.example.newsapp.R;
+import com.example.newsapp.Service.NotificationService;
 import com.example.newsapp.Utils.APIUtils;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +53,10 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private ProgressBar mProgress;
     private NewsAPI mNewsAPI;
-    private String APIKey = "d83e2de86b554a28b0eb55dc23f1fecd";
+    public static String APIKey = "d83e2de86b554a28b0eb55dc23f1fecd";
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private android.support.v7.widget.SearchView mSearchView;
+    private String mLocale;
 
 
     @Override
@@ -56,6 +65,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mLocale = getApplicationContext().getResources().getConfiguration().locale.getCountry();
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -99,7 +109,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     if(isNetworkAvailable()) {
                         mProgress.setVisibility(View.VISIBLE);
-                        makeAPICall();
+                        makeAPICall(mLocale);
                     } else {
                         mProgress.setVisibility(View.GONE);
                         Toast.makeText(MainActivity.this, "Internet connection not available.", Toast.LENGTH_LONG).show();
@@ -117,7 +127,7 @@ public class MainActivity extends AppCompatActivity
             if(isNetworkAvailable()) {
                 new Thread(() -> {
                     articles.clear();
-                    makeAPICall();
+                    makeAPICall(mLocale);
                 }).start();
                 mSwipeRefreshLayout.setRefreshing(false);
             } else {
@@ -129,11 +139,24 @@ public class MainActivity extends AppCompatActivity
 
         mSearchView = findViewById(R.id.action_search);
 
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(MainActivity.this));
+        Job myJob = dispatcher.newJobBuilder()
+                .setService(NotificationService.class)
+                .setTag("notification")
+                .setRecurring(true)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setTrigger(Trigger.executionWindow(0, 86400))
+                .setReplaceCurrent(false)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .build();
+
+        dispatcher.mustSchedule(myJob);
+
     }
 
-    public void makeAPICall(){
+    public void makeAPICall(String locale){
         //mProgress.setVisibility(View.VISIBLE);
-        mNewsAPI.getNewsArticles("us", APIKey)
+        mNewsAPI.getNewsArticles(locale, APIKey)
                 .doOnComplete(() -> {
                   //  Toast.makeText(MainActivity.this, "New articles available. Swipe down to update.", Toast.LENGTH_SHORT).show();
                 })
@@ -176,7 +199,7 @@ public class MainActivity extends AppCompatActivity
                     ArrayList<NewsArticle> news = articlesWrapper.getArticles();
                     for(NewsArticle article:news){
                         ArticleEntity articleEntity = new ArticleEntity(article.getTitle(), article.getUrl(), article.getUrlToImge(), article.getDescription(), article.getContent());
-                        mArticleViewModel.insert(articleEntity);
+                        //mArticleViewModel.insert(articleEntity);
                         //Log.d("TAG", "I am here" + article.getTitle());
                     }
 

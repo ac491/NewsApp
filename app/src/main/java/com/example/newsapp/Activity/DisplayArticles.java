@@ -37,14 +37,16 @@ public class DisplayArticles extends AppCompatActivity {
         content.setText(newsArticle.getDescription());
 
         Button webButton = findViewById(R.id.webButton);
+        WebView webView = findViewById(R.id.webView);
+        webView.setVisibility(View.GONE);
+
         NewsArticle finalNewsArticle = newsArticle;
         webButton.setOnClickListener(view -> {
             title.setVisibility(View.GONE);
             content.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
             webButton.setVisibility(View.GONE);
-
-            WebView webView = findViewById(R.id.webView);
+            webView.setVisibility(View.VISIBLE);
             webView.loadUrl(finalNewsArticle.getUrl());
             WebChromeClient webChromeClient = new WebChromeClient(){
                 public void onCloseWindow(WebView w){

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activity.DisplayArticles"
@@ -15,21 +19,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="30dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
         android:textColor="#000000"
         android:id="@+id/displaytitle"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
         android:textSize="15dp"
         android:textColor="#000000"
         android:id="@+id/displaycontent"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:text="Go To Source"
-        android:id="@+id/webButton"/>
+        android:id="@+id/webButton"
+        android:padding="10dp"
+        android:background="@drawable/buttondesign"/>
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
@@ -38,3 +48,4 @@
 
 
 </LinearLayout>
+</ScrollView>

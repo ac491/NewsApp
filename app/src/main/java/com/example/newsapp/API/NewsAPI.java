@@ -18,4 +18,8 @@ public interface NewsAPI {
     @Headers("Content-Type: application/json")
     @GET("/v2/everything")
     Observable<ArticlesWrapper> searchArticles(@Query("q") String query, @Query("apiKey") String apiKey);
+
+    @Headers("Content-Type: application/json")
+    @GET("/v2/top-headlines")
+    Call<ArticlesWrapper> getHeadLine(@Query("country") String country, @Query("pageSize") int pageSize, @Query("apiKey") String apiKey);
 }
