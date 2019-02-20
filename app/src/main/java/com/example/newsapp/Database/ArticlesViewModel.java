@@ -2,6 +2,7 @@ package com.example.newsapp.Database;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
+import android.util.Log;
 
 
 import com.example.newsapp.API.Model.NewsArticle;

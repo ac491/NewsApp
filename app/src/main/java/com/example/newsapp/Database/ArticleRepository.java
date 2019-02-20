@@ -2,6 +2,7 @@ package com.example.newsapp.Database;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.newsapp.Database.Model.ArticleDatabase;
 import com.example.newsapp.Database.Model.ArticleEntity;
@@ -18,12 +19,19 @@ public class ArticleRepository {
     ArticleRepository(Application application) {
         ArticleDatabase db = ArticleDatabase.getDatabase(application);
         mArticleDao = db.ArticlesDao();
-        new Thread(new Runnable() {
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 mAllArticles = mArticleDao.getAllArticles();
             }
-        }).start();
+        });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     List<ArticleEntity> getAllWords() {
@@ -32,6 +40,7 @@ public class ArticleRepository {
 
 
     public void insert (ArticleEntity article) {
+        Log.d("TAG","Insert");
         new insertAsyncTask(mArticleDao).execute(article);
     }
 
@@ -57,6 +66,19 @@ public class ArticleRepository {
         protected Void doInBackground(final ArticleEntity... params) {
                 mAsyncTaskDao.insertArticle(params[0]);
                 return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayList<ArticleEntity> articles = (ArrayList<ArticleEntity>) mAsyncTaskDao.getAllArticles();
+                    Log.d("TAG", articles.size()+"");
+                }
+            }).start();
+
         }
     }
 
