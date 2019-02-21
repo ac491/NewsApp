@@ -17,6 +17,8 @@ import com.bumptech.glide.Glide;
 import com.example.newsapp.API.Model.NewsArticle;
 import com.example.newsapp.R;
 
+import static android.text.Layout.JUSTIFICATION_MODE_INTER_WORD;
+
 public class DisplayArticles extends AppCompatActivity {
 
     @Override

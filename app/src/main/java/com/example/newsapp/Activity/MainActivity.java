@@ -26,6 +26,7 @@ import com.example.newsapp.API.Model.NewsArticle;
 import com.example.newsapp.API.NewsAPI;
 import com.example.newsapp.Adapter.NewsAdapter;
 import com.example.newsapp.Database.ArticlesViewModel;
+import com.example.newsapp.Database.LocalDatabase.LocalDatabaseHelper;
 import com.example.newsapp.Database.Model.ArticleEntity;
 import com.example.newsapp.R;
 import com.example.newsapp.Service.NotificationService;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private android.support.v7.widget.SearchView mSearchView;
     private String mLocale;
+    private LocalDatabaseHelper mDb;
 
 
     @Override
@@ -76,6 +78,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mDb = new LocalDatabaseHelper(MainActivity.this);
 
         mArticleViewModel = ViewModelProviders.of(MainActivity.this).get(ArticlesViewModel.class);
         recyclerView = findViewById(R.id.recycler_view);
@@ -97,7 +101,7 @@ public class MainActivity extends AppCompatActivity
                                 articleEntity.content);
                         articles.add(newsArticle);
 
-                        final NewsAdapter adapter = new NewsAdapter(MainActivity.this, articles);
+                        final NewsAdapter adapter = new NewsAdapter(MainActivity.this, articles, false);
                         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(MainActivity.this);
                         recyclerView.setLayoutManager(mLayoutManager);
                         recyclerView.post(() -> {
@@ -133,6 +137,7 @@ public class MainActivity extends AppCompatActivity
             } else {
                 mProgress.setVisibility(View.GONE);
                 Toast.makeText(MainActivity.this, "Internet connection not available.", Toast.LENGTH_LONG).show();
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -172,7 +177,7 @@ public class MainActivity extends AppCompatActivity
                         //Log.d("TAG", "I am here" + article.getTitle());
                     }
 
-                    final NewsAdapter adapter = new NewsAdapter(this, articles);
+                    final NewsAdapter adapter = new NewsAdapter(this, articles, false);
                     RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
                     recyclerView.setLayoutManager(mLayoutManager);
                     recyclerView.post(new Runnable() {
@@ -203,7 +208,7 @@ public class MainActivity extends AppCompatActivity
                         //Log.d("TAG", "I am here" + article.getTitle());
                     }
 
-                    final NewsAdapter adapter = new NewsAdapter(this, news);
+                    final NewsAdapter adapter = new NewsAdapter(this, news, false);
                     RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
                     recyclerView.setLayoutManager(mLayoutManager);
                     recyclerView.post(() -> {
@@ -242,15 +247,19 @@ public class MainActivity extends AppCompatActivity
         mSearchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(final String s) {
-                mProgress.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.INVISIBLE);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("123", "zfhkjzflk");
-                        searchAPICall(s);
-                    }
-                }).start();
+                if(isNetworkAvailable()) {
+                    mProgress.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.INVISIBLE);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d("123", "zfhkjzflk");
+                            searchAPICall(s);
+                        }
+                    }).start();
+                } else {
+                    Toast.makeText(MainActivity.this, "Internet connection not available", Toast.LENGTH_LONG).show();
+                }
                 return true;
             }
 
@@ -260,7 +269,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         mSearchView.setOnCloseListener(() -> {
-            NewsAdapter newsAdapter = new NewsAdapter(MainActivity.this, articles);
+            NewsAdapter newsAdapter = new NewsAdapter(MainActivity.this, articles, false);
             recyclerView.setAdapter(newsAdapter);
             return false;
         });

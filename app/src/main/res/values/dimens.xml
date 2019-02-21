@@ -6,7 +6,7 @@
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="card_margin">5dp</dimen>
-    <dimen name="card_album_radius">0dp</dimen>
+    <dimen name="card_album_radius">5dp</dimen>
     <dimen name="news_image_height">160dp</dimen>
     <dimen name="news_title_padding">10dp</dimen>
     <dimen name="news_title">15dp</dimen>
