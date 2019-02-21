@@ -1,7 +1,11 @@
 package com.example.newsapp.Activity;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.newsapp.API.Model.NewsArticle;
 import com.example.newsapp.Adapter.NewsAdapter;
@@ -24,6 +29,7 @@ public class OfflineNews extends AppCompatActivity {
     private LocalDatabaseHelper mDb;
     private RecyclerView recyclerView;
     private ProgressBar mProgress;
+    private SwipeRefreshLayout mSwipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +39,19 @@ public class OfflineNews extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_viewOffline);
         mProgress = findViewById(R.id.progressOffline);
         recyclerView.setVisibility(View.INVISIBLE);
+        mSwipe = findViewById(R.id.refreshOffline);
 
         mDb = new LocalDatabaseHelper(this);
         getLocalRecords();
 
+        mSwipe.setOnRefreshListener(() -> {
+            mProgress.setVisibility(View.VISIBLE);
+                new Thread(this::getLocalRecords).start();
+                mSwipe.setRefreshing(false);
+        });
+
     }
+
 
     public void getLocalRecords(){
 

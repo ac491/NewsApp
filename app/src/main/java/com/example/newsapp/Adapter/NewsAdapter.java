@@ -77,6 +77,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
                 arrayAdapter.add("Save Offline");
 
                 builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
+                    Toast.makeText(mContext, "Succesfully saved offline", Toast.LENGTH_LONG).show();
                     Thread t = new Thread(() -> mLocalDatabaseHelper.insertRecord(mNewsArticleList.get(position)));
                     t.start();
                     try {
@@ -84,7 +85,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                 });
                 builderSingle.show();
             } else {
@@ -93,7 +93,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
                 arrayAdapter.add("Remove from Offline");
 
                 builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
-
+                    Toast.makeText(mContext, "Succesfully removed from offline. Please swipe to refresh list", Toast.LENGTH_LONG).show();
                     Thread t = new Thread(() -> mLocalDatabaseHelper.removeArticle(mNewsArticleList.get(position).getTitle()));
                     t.start();
                     try {
