@@ -47,10 +47,11 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public boolean insertRecord(NewsArticle newsArticle) {
+    public long insertRecord(NewsArticle newsArticle) {
         List<NewsArticle> articles = getAllArticles();
         if(articles != null && articles.contains(newsArticle)) {
-            return false;
+            //return false;
+            return -1;
         } else {
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
@@ -61,7 +62,7 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_CONTENT, newsArticle.getContent());
             long id = db.insert(TABLE_NAME, null, values);
             db.close();
-            return true;
+            return id;
         }
     }
 

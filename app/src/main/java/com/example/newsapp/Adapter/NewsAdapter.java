@@ -1,7 +1,6 @@
 package com.example.newsapp.Adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +23,7 @@ import com.example.newsapp.R;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
 
@@ -77,13 +77,18 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
                 arrayAdapter.add("Save Offline");
 
                 builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
-                    Toast.makeText(mContext, "Succesfully saved offline", Toast.LENGTH_LONG).show();
-                    Thread t = new Thread(() -> mLocalDatabaseHelper.insertRecord(mNewsArticleList.get(position)));
+                    AtomicLong inserted = new AtomicLong();
+                    Thread t = new Thread(() -> inserted.set(mLocalDatabaseHelper.insertRecord(mNewsArticleList.get(position))));
                     t.start();
                     try {
                         t.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+                    if(inserted.get() != -1){
+                        Toast.makeText(mContext, "Succesfully saved offline", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(mContext, "Article already offline", Toast.LENGTH_LONG).show();
                     }
                 });
                 builderSingle.show();

@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         //List<ArticleEntity> cachedArticles;
 
                 List<ArticleEntity> cachedArticles = mArticleViewModel.getAllWords();
-                if(cachedArticles != null){
+                if(!cachedArticles.isEmpty()){
                     Log.d("TAG", "cached");
                     for(ArticleEntity articleEntity : cachedArticles){
                         NewsArticle newsArticle = new NewsArticle(articleEntity.title,
@@ -116,8 +116,8 @@ public class MainActivity extends AppCompatActivity
                     }
                 } else {
                     if(isNetworkAvailable()) {
-                        mProgress.setVisibility(View.VISIBLE);
-                        makeAPICall(mLocale);
+                        //mProgress.setVisibility(View.VISIBLE);
+                        new Thread(() -> makeAPICall(mLocale)).start();
                     } else {
                         mProgress.setVisibility(View.GONE);
                         Toast.makeText(MainActivity.this, "Internet connection not available.", Toast.LENGTH_LONG).show();
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(articlesWrapper -> {
-                    //Log.d("TAG", "I am here");
+                    Log.d("TAG", "I am here");
                     articles = articlesWrapper.getArticles();
                     mArticleViewModel.clearCache();
                     for(NewsArticle article:articles){
