@@ -13,7 +13,7 @@ public interface NewsAPI {
 
     @Headers("Content-Type: application/json")
     @GET("/v2/top-headlines")
-    Observable<ArticlesWrapper> getNewsArticles(@Query("country") String country, @Query("apiKey") String apiKey);
+    Observable<ArticlesWrapper> getNewsArticles(@Query("country") String country, @Query("category") String category, @Query("apiKey") String apiKey);
 
     @Headers("Content-Type: application/json")
     @GET("/v2/everything")

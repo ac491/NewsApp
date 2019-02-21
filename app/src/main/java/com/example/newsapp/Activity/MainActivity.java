@@ -2,6 +2,7 @@ package com.example.newsapp.Activity;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -11,6 +12,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     private android.support.v7.widget.SearchView mSearchView;
     private String mLocale;
     private LocalDatabaseHelper mDb;
+    private String filter = null;
 
 
     @Override
@@ -161,7 +165,7 @@ public class MainActivity extends AppCompatActivity
 
     public void makeAPICall(String locale){
         //mProgress.setVisibility(View.VISIBLE);
-        mNewsAPI.getNewsArticles(locale, APIKey)
+        mNewsAPI.getNewsArticles(locale, filter, APIKey)
                 .doOnComplete(() -> {
                   //  Toast.makeText(MainActivity.this, "New articles available. Swipe down to update.", Toast.LENGTH_SHORT).show();
                 })
@@ -224,9 +228,18 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to exit?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        MainActivity.super.onBackPressed();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+
     }
 
     private boolean isNetworkAvailable() {
@@ -285,11 +298,48 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.filter) {
+            showAlert();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showAlert(){
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(MainActivity.this);
+        builderSingle.setTitle("Category");
+
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                MainActivity.this,
+                android.R.layout.select_dialog_item);
+
+        arrayAdapter.add("Business");
+        arrayAdapter.add("Entertainment");
+        arrayAdapter.add("General");
+        arrayAdapter.add("Health");
+        arrayAdapter.add("Science");
+        arrayAdapter.add("Sports");
+        arrayAdapter.add("Technology");
+
+        builderSingle.setNegativeButton("Reset",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        filter = null;
+                        dialog.dismiss();
+                        Toast.makeText(MainActivity.this, "Removed all filters. Refresh to see new results.", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+        builderSingle.setAdapter(arrayAdapter,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        filter = arrayAdapter.getItem(which).toLowerCase();
+                        dialog.dismiss();
+                        Toast.makeText(MainActivity.this, "Filter added. Refresh to see new results.", Toast.LENGTH_LONG).show();
+                    }
+                });
+        builderSingle.show();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -307,6 +357,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
 }
 
