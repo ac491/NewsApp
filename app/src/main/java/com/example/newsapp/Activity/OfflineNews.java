@@ -60,19 +60,21 @@ public class OfflineNews extends AppCompatActivity {
         Log.d("TAG", String.valueOf(articles.size()));
 
         if(articles.size() == 0){
+            recyclerView.setVisibility(View.GONE);
+            mProgress.setVisibility(View.GONE);
             ConstraintLayout constraintLayout = findViewById(R.id.constraint);
             Snackbar snackbar = Snackbar
-                    .make(constraintLayout, "No articles added to offline", Snackbar.LENGTH_LONG);
+                    .make(constraintLayout, "No articles added to offline. Long press on a news card to add it to offline.", Snackbar.LENGTH_LONG);
             snackbar.show();
+        } else {
+            final NewsAdapter adapter = new NewsAdapter(this, articles, true);
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(OfflineNews.this);
+            recyclerView.setLayoutManager(mLayoutManager);
+            recyclerView.post(() -> {
+                mProgress.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                recyclerView.setAdapter(adapter);
+            });
         }
-
-        final NewsAdapter adapter = new NewsAdapter(this, articles, true);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(OfflineNews.this);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.post(() -> {
-            mProgress.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            recyclerView.setAdapter(adapter);
-        });
     }
 }
